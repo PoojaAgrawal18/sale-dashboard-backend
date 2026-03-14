@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { createServer } from "http";
+import { chatbotHandler } from "./chatbot/controller";
 import { userHandler } from "./user/controller";
 import { authHandler } from "./auth";
 
@@ -32,6 +33,11 @@ const server = createServer((req, res) => {
   try {
     if (url.includes("login") || url.includes("signup")) {
       authHandler(req, res);
+      return;
+    }
+
+    if (url === "/api/chatbot") {
+      chatbotHandler(req, res);
       return;
     }
 
