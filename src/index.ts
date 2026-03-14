@@ -5,6 +5,11 @@ import { userHandler } from "./user/controller";
 import { authHandler } from "./auth";
 
 const PORT = process.env.APP_PORT ? Number(process.env.APP_PORT) : 7474;
+const BACKEND_URL = process.env.APP_URL || `http://localhost:${PORT}`;
+const CHATBOT_URL =
+  process.env.CHATBOT_URL ||
+  `${BACKEND_URL.replace(/\/$/, "")}/api/chatbot`;
+
 const FRONTEND_URIS = (process.env.FRONTEND_URI || "http://localhost:3000")
   .split(",")
   .map((u) => u.trim().replace(/\/$/, ""));
@@ -68,6 +73,7 @@ process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
 });
 
-server.listen(PORT, () =>
-  console.log(`Server running at http://localhost:${PORT} | CORS: ${FRONTEND_URIS.join(", ")}`)
-);
+server.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT} | CORS: ${FRONTEND_URIS.join(", ")}`);
+  console.log(`Chatbot API: POST ${CHATBOT_URL}`);
+});
