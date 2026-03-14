@@ -6,9 +6,7 @@ import { authHandler } from "./auth";
 
 const PORT = process.env.APP_PORT ? Number(process.env.APP_PORT) : 7474;
 const BACKEND_URL = process.env.APP_URL || `http://localhost:${PORT}`;
-const CHATBOT_URL =
-  process.env.CHATBOT_URL ||
-  `${BACKEND_URL.replace(/\/$/, "")}/api/chatbot`;
+const CHATBOT_URL =(process.env.CHATBOT_URL || "http://localhost:3000")
 
 const FRONTEND_URIS = (process.env.FRONTEND_URI || "http://localhost:3000")
   .split(",")
