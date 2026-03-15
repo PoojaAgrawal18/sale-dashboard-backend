@@ -8,6 +8,12 @@ export function authHandler(req: IncomingMessage, res: ServerResponse) {
   const url = rawUrl.split("?")[0];
   const method = req.method || "";
 
+  // Admin login: /api/admin/login, /admin/login, etc.
+  if (url.endsWith("/admin/login") && method === "POST") {
+    adminLogin(req, res);
+    return;
+  }
+
   // Support /api/login, /login, /auth/login, /api/auth/login, with or without trailing slash
   if (url.endsWith("/login") && method === "POST") {
     login(req, res);
@@ -56,6 +62,53 @@ function login(req: IncomingMessage, res: ServerResponse) {
       res.end(
         JSON.stringify({
           user,
+          redirectTo,
+        })
+      );
+    } catch (err: unknown) {
+      if (err instanceof SyntaxError) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Invalid request body" }));
+        return;
+      }
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ message: "Something went wrong" }));
+    }
+  });
+}
+
+function adminLogin(req: IncomingMessage, res: ServerResponse) {
+  let body = "";
+
+  req.on("data", (chunk) => (body += chunk));
+
+  req.on("end", async () => {
+    try {
+      const data = body ? JSON.parse(body) : {};
+      const { email, password } = data;
+
+      if (!email || !password) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Email and password are required" }));
+        return;
+      }
+
+      const admin = await authService.adminLogin(email, password);
+
+      if (!admin) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Invalid email or password" }));
+        return;
+      }
+
+      const base = (process.env.FRONTEND_URI || "http://localhost:3000").split(",")[0].trim().replace(/\/$/, "");
+      const path = (process.env.ADMIN_LOGIN_REDIRECT_PATH || "/admin/dashboard").replace(/^\//, "");
+      const redirectTo = `${base}/${path}`;
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          admin,
           redirectTo,
         })
       );

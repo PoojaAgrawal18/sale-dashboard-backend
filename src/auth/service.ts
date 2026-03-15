@@ -7,6 +7,12 @@ export class AuthService {
     });
   }
 
+  async adminLogin(email: string, password: string) {
+    return prisma.admin.findFirst({
+      where: { email, password },
+    });
+  }
+
   async signup(name: string, email: string, password: string) {
     return prisma.user.create({
       data: { name, email, password },

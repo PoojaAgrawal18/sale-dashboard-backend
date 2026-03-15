@@ -2,6 +2,7 @@ import "dotenv/config";
 import { createServer } from "http";
 import { chatbotHandler } from "./chatbot/controller";
 import { userHandler } from "./user/controller";
+import { adminHandler } from "./admin/controller";
 import { authHandler } from "./auth";
 
 const PORT = process.env.APP_PORT ? Number(process.env.APP_PORT) : 7474;
@@ -46,6 +47,11 @@ const server = createServer((req, res) => {
 
     if (url.startsWith("/api/users")) {
       userHandler(req, res);
+      return;
+    }
+
+    if (url.startsWith("/api/admins")) {
+      adminHandler(req, res);
       return;
     }
 
